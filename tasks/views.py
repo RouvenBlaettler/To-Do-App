@@ -4,26 +4,21 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from .models import NormalTask, ContinuousTask
 from .forms import NormalTaskForm, ContinuousTaskForm
+from django.contrib.auth.forms import UserCreationForm
 
 
 def register(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm')
-        
-        if password != password_confirm:
-            return render(request, 'tasks/register.html', {'error': 'Passwords do not match'})
-        
-        if User.objects.filter(username=username).exists():
-            return render(request, 'tasks/register.html', {'error': 'Username already exists'})
-        
-        user = User.objects.create_user(username=username, password=password)
-        login(request, user)
-        return redirect('dashboard')
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()  # Create new user
+            return redirect('login')
+    else:
+        form = UserCreationForm()
     
-    return render(request, 'tasks/register.html')
-
+    return render(request, "pages/register.html", {
+        "form": form
+    })
 
 def login_view(request):
     if request.method == 'POST':
@@ -53,6 +48,8 @@ def dashboard(request):
     
     if request.method == 'POST':
         task_type = request.POST.get('task_type')
+        print(f"Task type selected: {task_type}")
+        print(f"POST data: {request.POST}")
         
         if task_type == 'normal':
             normal_task_form = NormalTaskForm(request.POST)
@@ -60,7 +57,10 @@ def dashboard(request):
                 normal_task = normal_task_form.save(commit=False)
                 normal_task.user = request.user
                 normal_task.save()
+                print(f"Normal task created: {normal_task.title}")
                 return redirect('dashboard')
+            else:
+                print("Normal form errors:", normal_task_form.errors)
 
         elif task_type == 'continuous':
             continuous_task_form = ContinuousTaskForm(request.POST)
@@ -68,7 +68,10 @@ def dashboard(request):
                 continuous_task = continuous_task_form.save(commit=False)
                 continuous_task.user = request.user
                 continuous_task.save()
+                print(f"Continuous task created: {continuous_task.title}")
                 return redirect('dashboard')
+            else:
+                print("Continuous form errors:", continuous_task_form.errors)
             
 
     context = {

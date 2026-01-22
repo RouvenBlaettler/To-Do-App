@@ -1,7 +1,9 @@
 {% extends "tasks/base.html" %}
 
 {% block content %}
-<h1>Welcome to the To-Do App</h1>
+{% if request.user.is_authenticated %}
+<h1>Welcome {{ request.user.username }} to the To-Do App</h1>
+{% endif %}
 <h2>Create a New Task</h2>
 <form method="post">
     {% csrf_token %}
@@ -52,16 +54,35 @@
   const normalDiv = document.getElementById('normal_form_div');
   const continuousDiv = document.getElementById('continuous_form_div');
 
-  // Listen for changes in the dropdown
-  selector.addEventListener('change', () => {
+  // Function to enable/disable form fields
+  function updateFormState() {
+    const normalInputs = normalDiv.querySelectorAll('input, select, textarea');
+    const continuousInputs = continuousDiv.querySelectorAll('input, select, textarea');
+    
     if (selector.value === 'normal') {
-      normalDiv.style.display = 'block';        // Show normal form
-      continuousDiv.style.display = 'none';     // Hide continuous form
+      normalDiv.style.display = 'block';
+      continuousDiv.style.display = 'none';
+      
+      // Enable normal form fields
+      normalInputs.forEach(input => input.disabled = false);
+      // Disable continuous form fields
+      continuousInputs.forEach(input => input.disabled = true);
     } else {
-      normalDiv.style.display = 'none';         // Hide normal form
-      continuousDiv.style.display = 'block';    // Show continuous form
+      normalDiv.style.display = 'none';
+      continuousDiv.style.display = 'block';
+      
+      // Disable normal form fields
+      normalInputs.forEach(input => input.disabled = true);
+      // Enable continuous form fields
+      continuousInputs.forEach(input => input.disabled = false);
     }
-  });
+  }
+
+  // Listen for changes in the dropdown
+  selector.addEventListener('change', updateFormState);
+  
+  // Set initial state
+  updateFormState();
 </script>
 
 {% endblock %}
