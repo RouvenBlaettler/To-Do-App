@@ -1,7 +1,7 @@
 from django import forms
 from .models import NormalTask, ContinuousTask
 
-class TaskForm(forms.ModelForm):
+class NormalTaskForm(forms.ModelForm):
     class Meta:
         model = NormalTask
         fields = ['title', 'completed']
@@ -9,4 +9,4 @@ class TaskForm(forms.ModelForm):
 class ContinuousTaskForm(forms.ModelForm):
     class Meta:
         model = ContinuousTask
-        fields = ['title', 'work_time', 'completed', 'task_type']
+        fields = ['title', 'work_time', 'completed']

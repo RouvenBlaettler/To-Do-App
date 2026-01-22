@@ -1,0 +1,67 @@
+{% extends "tasks/base.html" %}
+
+{% block content %}
+<h1>Welcome to the To-Do App</h1>
+<h2>Create a New Task</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="task_type">
+        Task Type:
+        <select id="task_type" name="task_type">
+            <option value="normal">Normal Task</option>
+            <option value="continuous">Continuous Task</option>
+        </select>
+    </label>
+    <!-- Normal task form -->
+    <div id="normal_form_div">
+        {{ normal_task_form.as_p }}
+    </div>
+
+    <!-- Continuous task form, hidden by default -->
+    <div id="continuous_form_div" style="display:none;">
+        {{ continuous_task_form.as_p }}
+    </div>
+    <button type="submit">Create Task</button>
+</form>
+
+<hr>
+
+
+<h3>Normal Tasks:</h3>
+<ul>
+    {% for task in normal_tasks %}
+        <li>{{ task.title }} - Completed: {{ task.completed }}</li>
+    {% empty %}
+        <li>No normal tasks available.</li>
+    {% endfor %}
+
+</ul>
+
+<h3>Continuous Tasks:</h3>
+<ul>
+    {% for task in continuous_tasks %}
+        <li>{{ task.title }} - Work time: {{ task.work_time }}</li>
+    {% empty %}
+        <li>No continuous tasks available.</li>
+    {% endfor %}
+</ul>
+
+<script>
+  // Get references to the dropdown and form divs
+  const selector = document.getElementById('task_type');
+  const normalDiv = document.getElementById('normal_form_div');
+  const continuousDiv = document.getElementById('continuous_form_div');
+
+  // Listen for changes in the dropdown
+  selector.addEventListener('change', () => {
+    if (selector.value === 'normal') {
+      normalDiv.style.display = 'block';        // Show normal form
+      continuousDiv.style.display = 'none';     // Hide continuous form
+    } else {
+      normalDiv.style.display = 'none';         // Hide normal form
+      continuousDiv.style.display = 'block';    // Show continuous form
+    }
+  });
+</script>
+
+{% endblock %}
