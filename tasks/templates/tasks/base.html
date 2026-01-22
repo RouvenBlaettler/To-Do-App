@@ -16,6 +16,15 @@
         <a href="{% url 'register' %}">Register</a>
     {% endif %}
     </nav>
+    {% if messages %}
+        <ul class="messages">
+            {% if messages %}
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            {% endif %}
+        </ul>
+    {% endif %}
     {% block content %}
     {% endblock %}
 </body>
