@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from .models import NormalTask, ContinuousTask
 from .forms import NormalTaskForm, ContinuousTaskForm
 from django.contrib.auth.forms import UserCreationForm
-
+from django.shortcuts import get_object_or_404
 
 def register(request):
     if request.method == "POST":
@@ -85,10 +85,10 @@ def dashboard(request):
 
 def edit_task(request, task_id, task_type):
     if task_type == 'normal':
-        task = NormalTask.objects.get(id=task_id, user=request.user)
+        task = get_object_or_404(NormalTask, id=task_id, user=request.user)
         form_class = NormalTaskForm
     else:
-        task = ContinuousTask.objects.get(id=task_id, user=request.user)
+        task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
         form_class = ContinuousTaskForm
 
     if request.method == 'POST':
@@ -99,4 +99,16 @@ def edit_task(request, task_id, task_type):
     else:
         form = form_class(instance=task)
 
-    return render(request, 'tasks/edit_task.html', {'form': form, 'task_type': task_type})
+    return render(request, 'tasks/edit_task.html', {'form': form, 'task_id': task_id, 'task_type': task_type})
+
+def delete_task(request, task_id, task_type):
+    if request.method == 'POST':
+        if task_type == 'normal':
+            task = get_object_or_404(NormalTask, id=task_id, user=request.user)
+        else:
+            task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
+
+        task.delete()
+        return redirect('dashboard')
+    
+    return redirect('dashboard')
