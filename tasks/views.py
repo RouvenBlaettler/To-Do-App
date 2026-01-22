@@ -113,3 +113,16 @@ def delete_task(request, task_id, task_type):
         return redirect('dashboard')
     
     return redirect('dashboard')
+
+
+def dice_roll(request):
+    import random
+    session = request.session
+    tasks = list(NormalTask.objects.filter(user=request.user, completed=False))
+    tasks.extend(list(ContinuousTask.objects.filter(user=request.user, completed=False)))
+    digit = random.randint(1, 4)
+    if digit == 1:
+        session['result'] = "BREAK!!!"
+    else:
+        session['result'] = random.choice(tasks).title if tasks else "No tasks available!"
+    return redirect('dashboard')

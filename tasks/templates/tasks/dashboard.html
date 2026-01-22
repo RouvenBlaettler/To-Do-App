@@ -48,6 +48,13 @@
     {% endfor %}
 </ul>
 
+{% if request.session.result %}
+<h2>Dice Roll Result: {{ request.session.result }}</h2>
+<a href="{% url 'dice_roll' %}">Roll again!</a>
+{% else %}
+<h2><a href="{% url 'dice_roll' %}">Roll the Dice!!!</a></h2>
+{% endif %}
+
 <script>
   // Get references to the dropdown and form divs
   const selector = document.getElementById('task_type');
