@@ -32,7 +32,7 @@
 <h3>Normal Tasks:</h3>
 <ul>
     {% for task in normal_tasks %}
-        <li>{{ task.title }} - Completed: {{ task.completed }}</li>
+        <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'normal' %}">Edit</a></li>
     {% empty %}
         <li>No normal tasks available.</li>
     {% endfor %}
@@ -42,7 +42,7 @@
 <h3>Continuous Tasks:</h3>
 <ul>
     {% for task in continuous_tasks %}
-        <li>{{ task.title }} - Work time: {{ task.work_time }}</li>
+        <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'continuous' %}">Edit</a></li>
     {% empty %}
         <li>No continuous tasks available.</li>
     {% endfor %}

@@ -81,3 +81,22 @@ def dashboard(request):
         'continuous_task_form': continuous_task_form,
     }
     return render(request, 'tasks/dashboard.html', context)
+
+
+def edit_task(request, task_id, task_type):
+    if task_type == 'normal':
+        task = NormalTask.objects.get(id=task_id, user=request.user)
+        form_class = NormalTaskForm
+    else:
+        task = ContinuousTask.objects.get(id=task_id, user=request.user)
+        form_class = ContinuousTaskForm
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = form_class(instance=task)
+
+    return render(request, 'tasks/edit_task.html', {'form': form, 'task_type': task_type})
