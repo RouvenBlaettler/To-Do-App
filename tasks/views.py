@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -6,12 +7,14 @@ from .models import NormalTask, ContinuousTask
 from .forms import NormalTaskForm, ContinuousTaskForm
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()  # Create new user
+            messages.success(request, "Registration successful. You can now log in.")
             return redirect('login')
     else:
         form = UserCreationForm()
@@ -38,6 +41,26 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+def create_task(request):
+    task_type = request.POST.get('task_type')
+
+    if task_type == 'normal':
+        normal_task_form = NormalTaskForm(request.POST)
+        if normal_task_form.is_valid():
+            normal_task = normal_task_form.save(commit=False)
+            normal_task.user = request.user
+            normal_task.save()
+            messages.success(request, "Normal task created successfully.")
+            return redirect('dashboard')
+
+    elif task_type == 'continuous':
+        continuous_task_form = ContinuousTaskForm(request.POST)
+        if continuous_task_form.is_valid():
+            continuous_task = continuous_task_form.save(commit=False)
+            continuous_task.user = request.user
+            continuous_task.save()
+            messages.success(request, "Continuous task created successfully.")
+            return redirect('dashboard')
 
 @login_required
 def dashboard(request):
@@ -47,32 +70,8 @@ def dashboard(request):
     continuous_task_form = ContinuousTaskForm()
     
     if request.method == 'POST':
-        task_type = request.POST.get('task_type')
-        print(f"Task type selected: {task_type}")
-        print(f"POST data: {request.POST}")
-        
-        if task_type == 'normal':
-            normal_task_form = NormalTaskForm(request.POST)
-            if normal_task_form.is_valid():
-                normal_task = normal_task_form.save(commit=False)
-                normal_task.user = request.user
-                normal_task.save()
-                print(f"Normal task created: {normal_task.title}")
-                return redirect('dashboard')
-            else:
-                print("Normal form errors:", normal_task_form.errors)
-
-        elif task_type == 'continuous':
-            continuous_task_form = ContinuousTaskForm(request.POST)
-            if continuous_task_form.is_valid():
-                continuous_task = continuous_task_form.save(commit=False)
-                continuous_task.user = request.user
-                continuous_task.save()
-                print(f"Continuous task created: {continuous_task.title}")
-                return redirect('dashboard')
-            else:
-                print("Continuous form errors:", continuous_task_form.errors)
-            
+        create_task(request)
+        return redirect('dashboard')
 
     context = {
         'normal_tasks': normal_tasks,
@@ -81,6 +80,7 @@ def dashboard(request):
         'continuous_task_form': continuous_task_form,
     }
     return render(request, 'tasks/dashboard.html', context)
+
 
 
 def edit_task(request, task_id, task_type):
@@ -95,6 +95,7 @@ def edit_task(request, task_id, task_type):
         form = form_class(request.POST, instance=task)
         if form.is_valid():
             form.save()
+            messages.success(request, "Task updated successfully.")
             return redirect('dashboard')
     else:
         form = form_class(instance=task)
@@ -109,6 +110,7 @@ def delete_task(request, task_id, task_type):
             task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
 
         task.delete()
+        messages.success(request, "Task deleted successfully.")
         return redirect('dashboard')
     
     return redirect('dashboard')
