@@ -60,6 +60,8 @@ def create_task(request):
             continuous_task.save()
             messages.success(request, "Continuous task created successfully.")
             return redirect('dashboard')
+    
+    return redirect('dashboard')
 
 @login_required
 def dashboard(request):
@@ -69,8 +71,8 @@ def dashboard(request):
     continuous_task_form = ContinuousTaskForm()
     
     if request.method == 'POST':
-        create_task(request)
-        return redirect('dashboard')
+        return create_task(request)
+        
 
     context = {
         'normal_tasks': normal_tasks,
@@ -114,15 +116,16 @@ def delete_task(request, task_id, task_type):
     
     return redirect('dashboard')
 
-
+@login_required
 def dice_roll(request):
     import random
     session = request.session
     tasks = list(NormalTask.objects.filter(user=request.user, completed=False))
     tasks.extend(list(ContinuousTask.objects.filter(user=request.user, completed=False)))
     digit = random.randint(1, 4)
-    if digit == 1:
-        session['result'] = "BREAK!!!"
+    if digit == 1 or not tasks:
+        session['result'] = {'type': 'break'}
     else:
-        session['result'] = random.choice(tasks).title if tasks else "No tasks available!"
+        random_task = random.choice(tasks)
+        session['result'] = {'type': 'task', 'task_id': random_task.id, 'task_type': 'normal' if isinstance(random_task, NormalTask) else 'continuous', 'task_title': random_task.title}
     return redirect('dashboard')

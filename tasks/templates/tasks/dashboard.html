@@ -48,11 +48,14 @@
     {% endfor %}
 </ul>
 
-{% if request.session.result %}
-<h2>Dice Roll Result: {{ request.session.result }}</h2>
-<a href="{% url 'dice_roll' %}">Roll again!</a>
-{% else %}
+{% if not request.session.result %}
 <h2><a href="{% url 'dice_roll' %}">Roll the Dice!!!</a></h2>
+{% elif request.session.result.type == 'break' %}
+<h2>Dice Roll Result: Take a break!</h2>
+<a href="{% url 'dice_roll' %}">Roll again!</a>
+{% elif request.session.result.type == 'task' %}
+<h2>Dice Roll Result: {{ request.session.result.task_title }}</h2>
+<a href="{% url 'dice_roll' %}">Roll again!</a>
 {% endif %}
 
 <script>
