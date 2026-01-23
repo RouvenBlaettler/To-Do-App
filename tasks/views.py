@@ -135,9 +135,12 @@ def complete_task(request, task_id, task_type):
     if request.method == 'POST':
         if task_type == 'normal':
             task = get_object_or_404(NormalTask, id=task_id, user=request.user)
-        else:
+        elif task_type == 'continuous':
             task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
+        else:
+            return redirect('dashboard')
         task.completed = True
         task.save()
         messages.success(request, "Task marked as completed.")
+        request.session.pop('result', None)
     return redirect('dashboard')
