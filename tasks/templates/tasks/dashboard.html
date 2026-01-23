@@ -49,10 +49,18 @@
 </ul>
 
 {% if not request.session.result %}
-<h2><a href="{% url 'dice_roll' %}">Roll the Dice!!!</a></h2>
-{% elif request.session.result.type == 'break' %}
+<form method="post" action="{% url 'dice_roll' %}">
+    {% csrf_token %}
+    <h2><button type="submit">Roll the Dice!!!</button></h2>
+</form>
+{% endif %}
+
+{% if request.session.result.type == 'break' %}
 <h2>Dice Roll Result: Take a break!</h2>
-<a href="{% url 'dice_roll' %}">Roll again!</a>
+<form method="post" action="{% url 'dice_roll' %}">
+    {% csrf_token %}
+    <h2><button type="submit">Roll again</button></h2>
+</form>
 {% elif request.session.result.type == 'task' %}
 <h2>Dice Roll Result: {{ request.session.result.task_title }}</h2>
 <form method="post" action="{% url 'complete_task' request.session.result.task_id request.session.result.task_type %}">
@@ -65,7 +73,10 @@
     <button type="submit">+1 hour!</button>
 </form>
 {% endif %}
-<a href="{% url 'dice_roll' %}">Roll again!</a>
+<form method="post" action="{% url 'dice_roll' %}">
+    {% csrf_token %}
+    <h2><button type="submit">Roll again!</button></h2>
+</form>
 {% endif %}
 
 

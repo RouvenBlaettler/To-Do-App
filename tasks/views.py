@@ -130,27 +130,28 @@ def delete_task(request, task_id, task_type):
 
 @login_required
 def dice_roll(request):
-    session = request.session
-    tasks = list(
-        NormalTask.objects.filter(user=request.user, completed=False)
-    )
-    tasks.extend(
-        list(ContinuousTask.objects.filter(user=request.user, completed=False))
-    )
-    digit = random.randint(1, 4)
-    if digit == 1 or not tasks:
-        session['result'] = {'type': 'break'}
-    else:
-        random_task = random.choice(tasks)
-        task_type = (
-            'normal' if isinstance(random_task, NormalTask) else 'continuous'
+    if request.method == 'POST':
+        session = request.session
+        tasks = list(
+            NormalTask.objects.filter(user=request.user, completed=False)
         )
-        session['result'] = {
-            'type': 'task',
-            'task_id': random_task.id,
-            'task_type': task_type,
-            'task_title': random_task.title,
-        }
+        tasks.extend(
+            list(ContinuousTask.objects.filter(user=request.user, completed=False))
+        )
+        digit = random.randint(1, 4)
+        if digit == 1 or not tasks:
+            session['result'] = {'type': 'break'}
+        else:
+            random_task = random.choice(tasks)
+            task_type = (
+                'normal' if isinstance(random_task, NormalTask) else 'continuous'
+            )
+            session['result'] = {
+                'type': 'task',
+                'task_id': random_task.id,
+                'task_type': task_type,
+                'task_title': random_task.title,
+            }
     return redirect('dashboard')
 
 
