@@ -58,11 +58,23 @@ def create_task(request):
         if continuous_task_form.is_valid():
             continuous_task = continuous_task_form.save(commit=False)
             continuous_task.user = request.user
+            if continuous_task.work_time > 0 and not continuous_task.completed:
+                continuous_task.on_going = True
             continuous_task.save()
             messages.success(request, "Continuous task created successfully.")
             return redirect('dashboard')
     
     return redirect('dashboard')
+
+def list_tasks(request):
+    not_started = list(NormalTask.objects.filter(user=request.user, completed=False)) + list(ContinuousTask.objects.filter(user=request.user, completed=False, on_going=False))
+    on_going = ContinuousTask.objects.filter(user=request.user, on_going=True)
+    completed = list(NormalTask.objects.filter(user=request.user, completed=True)) + list(ContinuousTask.objects.filter(user=request.user, completed=True))
+    return {
+        'not_started': not_started,
+        'on_going': on_going,
+        'completed': completed
+    }
 
 @login_required
 def dashboard(request):
@@ -70,6 +82,7 @@ def dashboard(request):
     continuous_tasks = ContinuousTask.objects.filter(user=request.user)
     normal_task_form = NormalTaskForm()
     continuous_task_form = ContinuousTaskForm()
+    
     
     if request.method == 'POST':
         return create_task(request)
@@ -80,7 +93,7 @@ def dashboard(request):
         'continuous_tasks': continuous_tasks,
         'normal_task_form': normal_task_form,
         'continuous_task_form': continuous_task_form,
-    }
+    } | list_tasks(request)
     return render(request, 'tasks/dashboard.html', context)
 
 
@@ -96,6 +109,10 @@ def edit_task(request, task_id, task_type):
     if request.method == 'POST':
         form = form_class(request.POST, instance=task)
         if form.is_valid():
+            if task_type == 'continuous':
+                form = form.save(commit=False)
+                if form.work_time > 0 and not form.completed:
+                    form.on_going = True
             form.save()
             messages.success(request, "Task updated successfully.")
             return redirect('dashboard')
@@ -137,6 +154,7 @@ def complete_task(request, task_id, task_type):
             task = get_object_or_404(NormalTask, id=task_id, user=request.user)
         elif task_type == 'continuous':
             task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
+            task.on_going = False  # Set on_going to False when completing
         else:
             return redirect('dashboard')
         task.completed = True
@@ -150,6 +168,9 @@ def increment_work_time(request, task_id):
     if request.method == 'POST':
         task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
         task.work_time += 1
+        if task.work_time > 0 and not task.completed:
+            task.on_going = True
         task.save()
         messages.success(request, f"Work time increased to {task.work_time} hours.")
     return redirect('dashboard')
+

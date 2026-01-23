@@ -68,6 +68,37 @@
 <a href="{% url 'dice_roll' %}">Roll again!</a>
 {% endif %}
 
+
+
+
+<h2>Task Status</h2>
+<h3>Not Started Tasks:</h3>
+<ul>
+    {% for task in not_started %}
+        <li>{{ task.title }}</li>
+    {% empty %}
+        <li>You started all tasks!!!</li>
+    {% endfor %}
+</ul>
+
+<h3>On Going Tasks:</h3>
+<ul>
+    {% for task in on_going %}
+        <li>{{ task.title }} - {{ task.work_time }} hours</li>
+    {% empty %}
+        <li>No on going tasks.</li>
+    {% endfor %}
+</ul>
+
+<h3>Completed Tasks:</h3>
+<ul>
+    {% for task in completed %}
+        <li>{{ task.title }}</li>
+    {% empty %}
+        <li>No completed tasks.</li>
+    {% endfor %}
+</ul>
+
 <script>
   // Get references to the dropdown and form divs
   const selector = document.getElementById('task_type');
