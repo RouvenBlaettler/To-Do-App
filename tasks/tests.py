@@ -51,3 +51,12 @@ class CompleteNormalTaskTestCase(TestCase):
         
         # Assert that the response redirects to dashboard (HTTP 302)
         self.assertEqual(response.status_code, 302)
+
+    def test_user_can_not_complete_other_users_task(self):
+        self.other_user = User.objects.create_user(username='other', password='otherpass')
+        self.client.login(username='other', password='otherpass')
+        response = self.client.post(reverse('complete_task', args=[self.normal_task.id, 'normal']))
+        self.normal_task.refresh_from_db()
+        self.assertFalse(self.normal_task.completed)
+        self.assertEqual(response.status_code, 404)
+        
