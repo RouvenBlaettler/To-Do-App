@@ -55,6 +55,10 @@
 <a href="{% url 'dice_roll' %}">Roll again!</a>
 {% elif request.session.result.type == 'task' %}
 <h2>Dice Roll Result: {{ request.session.result.task_title }}</h2>
+<form method="post" action="{% url 'complete_task' request.session.result.task_id request.session.result.task_type %}">
+    {% csrf_token %}
+    <button type="submit">Complete Task</button>
+</form>
 <a href="{% url 'dice_roll' %}">Roll again!</a>
 {% endif %}
 

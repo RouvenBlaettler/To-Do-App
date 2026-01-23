@@ -8,6 +8,7 @@ from .forms import NormalTaskForm, ContinuousTaskForm
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+import random
 
 def register(request):
     if request.method == "POST":
@@ -102,7 +103,7 @@ def edit_task(request, task_id, task_type):
         form = form_class(instance=task)
 
     return render(request, 'tasks/edit_task.html', {'form': form, 'task_id': task_id, 'task_type': task_type})
-
+@login_required
 def delete_task(request, task_id, task_type):
     if request.method == 'POST':
         if task_type == 'normal':
@@ -118,7 +119,6 @@ def delete_task(request, task_id, task_type):
 
 @login_required
 def dice_roll(request):
-    import random
     session = request.session
     tasks = list(NormalTask.objects.filter(user=request.user, completed=False))
     tasks.extend(list(ContinuousTask.objects.filter(user=request.user, completed=False)))
@@ -128,4 +128,16 @@ def dice_roll(request):
     else:
         random_task = random.choice(tasks)
         session['result'] = {'type': 'task', 'task_id': random_task.id, 'task_type': 'normal' if isinstance(random_task, NormalTask) else 'continuous', 'task_title': random_task.title}
+    return redirect('dashboard')
+
+@login_required
+def complete_task(request, task_id, task_type):
+    if request.method == 'POST':
+        if task_type == 'normal':
+            task = get_object_or_404(NormalTask, id=task_id, user=request.user)
+        else:
+            task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
+        task.completed = True
+        task.save()
+        messages.success(request, "Task marked as completed.")
     return redirect('dashboard')
