@@ -144,3 +144,12 @@ def complete_task(request, task_id, task_type):
         messages.success(request, "Task marked as completed.")
         request.session.pop('result', None)
     return redirect('dashboard')
+
+@login_required
+def increment_work_time(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
+        task.work_time += 1
+        task.save()
+        messages.success(request, f"Work time increased to {task.work_time} hours.")
+    return redirect('dashboard')

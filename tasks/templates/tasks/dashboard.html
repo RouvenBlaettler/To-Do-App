@@ -59,6 +59,12 @@
     {% csrf_token %}
     <button type="submit">Complete Task</button>
 </form>
+{% if request.session.result.task_type == 'continuous' %}
+<form method="post" action="{% url 'increment_work_time' request.session.result.task_id %}">
+    {% csrf_token %}
+    <button type="submit">+1 hour!</button>
+</form>
+{% endif %}
 <a href="{% url 'dice_roll' %}">Roll again!</a>
 {% endif %}
 
