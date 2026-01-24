@@ -17,7 +17,6 @@ class ContinuousTask(models.Model):
     work_time = models.PositiveIntegerField(default=0)  # in hours
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    on_going = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
