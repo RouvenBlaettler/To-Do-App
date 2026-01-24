@@ -9,6 +9,19 @@ from django.contrib import messages
 import random
 
 
+def get_task_and_form(task_id, task_type, user):
+    """Helper function to get task instance and corresponding form class."""
+    if task_type == 'normal':
+        task = get_object_or_404(NormalTask, id=task_id, user=user)
+        form_class = NormalTaskForm
+    elif task_type == 'continuous':
+        task = get_object_or_404(ContinuousTask, id=task_id, user=user)
+        form_class = ContinuousTaskForm
+    else:
+        return None, None
+    return task, form_class
+
+
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -65,10 +78,9 @@ def create_task(request):
 
 @login_required
 def dashboard(request):
-    normal_tasks = NormalTask.objects.filter(user=request.user)
-    continuous_tasks = ContinuousTask.objects.filter(user=request.user)
     normal_task_form = NormalTaskForm()
     continuous_task_form = ContinuousTaskForm()
+    
     not_started_normal = NormalTask.objects.filter(
         user=request.user, completed=False
     )
@@ -77,6 +89,7 @@ def dashboard(request):
     )
     not_started = list(not_started_normal) + list(not_started_continuous)
 
+    # on_going: Tasks that have been started (work_time > 0) but not yet completed
     on_going = ContinuousTask.objects.filter(user=request.user, work_time__gt=0, completed=False)
 
     completed_normal = NormalTask.objects.filter(
@@ -88,8 +101,8 @@ def dashboard(request):
     completed = list(completed_normal) + list(completed_continuous)
 
     context = {
-        'normal_tasks': normal_tasks,
-        'continuous_tasks': continuous_tasks,
+        'normal_tasks': not_started_normal,
+        'continuous_tasks': not_started_continuous,
         'normal_task_form': normal_task_form,
         'continuous_task_form': continuous_task_form,
         'not_started': not_started,
@@ -101,12 +114,9 @@ def dashboard(request):
 
 @login_required
 def edit_task(request, task_id, task_type):
-    if task_type == 'normal':
-        task = get_object_or_404(NormalTask, id=task_id, user=request.user)
-        form_class = NormalTaskForm
-    else:
-        task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
-        form_class = ContinuousTaskForm
+    task, form_class = get_task_and_form(task_id, task_type, request.user)
+    if not task:
+        return redirect('dashboard')
 
     if request.method == 'POST':
         form = form_class(request.POST, instance=task)
@@ -128,20 +138,17 @@ def edit_task(request, task_id, task_type):
 @login_required
 def delete_task(request, task_id, task_type):
     if request.method == 'POST':
-        if task_type == 'normal':
-            task = get_object_or_404(NormalTask, id=task_id, user=request.user)
-        else:
-            task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
-
-        task.delete()
-        messages.success(request, 'Task deleted successfully.')
-        return redirect('dashboard')
+        task, _ = get_task_and_form(task_id, task_type, request.user)
+        if task:
+            task.delete()
+            messages.success(request, 'Task deleted successfully.')
 
     return redirect('dashboard')
 
 
 @login_required
 def dice_roll(request):
+    # Dice roll feature: 25% chance of break (digit==1), 75% chance of random incomplete task
     if request.method == 'POST':
         session = request.session
         tasks = list(
@@ -170,16 +177,12 @@ def dice_roll(request):
 @login_required
 def complete_task(request, task_id, task_type):
     if request.method == 'POST':
-        if task_type == 'normal':
-            task = get_object_or_404(NormalTask, id=task_id, user=request.user)
-        elif task_type == 'continuous':
-            task = get_object_or_404(ContinuousTask, id=task_id, user=request.user)
-        else:
-            return redirect('dashboard')
-        task.completed = True
-        task.save()
-        messages.success(request, 'Task marked as completed.')
-        request.session.pop('result', None)
+        task, _ = get_task_and_form(task_id, task_type, request.user)
+        if task:
+            task.completed = True
+            task.save()
+            messages.success(request, 'Task marked as completed.')
+            request.session.pop('result', None)
     return redirect('dashboard')
 
 
