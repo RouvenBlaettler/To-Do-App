@@ -9,24 +9,27 @@
     </div>
     <aside class = "left">
         <h2>Create a New Task</h2>
-        <form method="post" action="{% url 'create_task' %}">
-            {% csrf_token %}
-            <label for="task_type">
-                Task Type:
-                <select id="task_type" name="task_type">
-                    <option value="normal">Normal Task</option>
-                    <option value="continuous">Continuous Task</option>
-                </select>
-            </label>
-            <!-- Normal task form -->
-            <div id="normal_form_div">
-                {{ normal_task_form.as_p }}
-            </div>
+        <label for="task_type">
+            Task Type:
+            <select id="task_type" name="task_type">
+                <option value="normal">Normal Task</option>
+                <option value="continuous">Continuous Task</option>
+            </select>
+        </label>
 
-            <!-- Continuous task form, hidden by default -->
-            <div id="continuous_form_div" style="display:none;">
-                {{ continuous_task_form.as_p }}
-            </div>
+        <!-- Normal task form -->
+        <form id="normal_form" method="post" action="{% url 'create_task' %}">
+            {% csrf_token %}
+            <input type="hidden" name="task_type" value="normal">
+            {{ normal_task_form.as_p }}
+            <button type="submit">Create Task</button>
+        </form>
+
+        <!-- Continuous task form, hidden by default -->
+        <form id="continuous_form" method="post" action="{% url 'create_task' %}" style="display:none;">
+            {% csrf_token %}
+            <input type="hidden" name="task_type" value="continuous">
+            {{ continuous_task_form.as_p }}
             <button type="submit">Create Task</button>
         </form>
 
@@ -122,32 +125,19 @@
 </div>
 
 <script>
-  // Get references to the dropdown and form divs
+  // Get references to the dropdown and forms
   const selector = document.getElementById('task_type');
-  const normalDiv = document.getElementById('normal_form_div');
-  const continuousDiv = document.getElementById('continuous_form_div');
+  const normalForm = document.getElementById('normal_form');
+  const continuousForm = document.getElementById('continuous_form');
 
-  // Function to enable/disable form fields
+  // Function to show/hide forms based on selection
   function updateFormState() {
-    const normalInputs = normalDiv.querySelectorAll('input, select, textarea');
-    const continuousInputs = continuousDiv.querySelectorAll('input, select, textarea');
-    
     if (selector.value === 'normal') {
-      normalDiv.style.display = 'block';
-      continuousDiv.style.display = 'none';
-      
-      // Enable normal form fields
-      normalInputs.forEach(input => input.disabled = false);
-      // Disable continuous form fields
-      continuousInputs.forEach(input => input.disabled = true);
+      normalForm.style.display = 'block';
+      continuousForm.style.display = 'none';
     } else {
-      normalDiv.style.display = 'none';
-      continuousDiv.style.display = 'block';
-      
-      // Disable normal form fields
-      normalInputs.forEach(input => input.disabled = true);
-      // Enable continuous form fields
-      continuousInputs.forEach(input => input.disabled = false);
+      normalForm.style.display = 'none';
+      continuousForm.style.display = 'block';
     }
   }
 
