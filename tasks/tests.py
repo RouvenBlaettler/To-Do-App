@@ -60,3 +60,50 @@ class CompleteNormalTaskTestCase(TestCase):
         self.assertFalse(self.normal_task.completed)
         self.assertEqual(response.status_code, 404)
         
+
+class CompleteContinuousTaskTestCase(TestCase):
+    """
+    Test case for verifying that continuous tasks can be marked as complete.
+    Tests the complete_task view functionality for ContinuousTask objects.
+    """
+    
+    def setUp(self):
+        """
+        Set up test fixtures that run before each test method.
+        Creates a test user and an uncompleted continuous task.
+        """
+        # Create a test user for authentication
+        self.user = User.objects.create_user(username='test', password='testpass') 
+        # Create a continuous task assigned to the test user
+        self.continuous_task = ContinuousTask.objects.create(
+            user=self.user,
+            title='Test Continuous Task',
+            work_time=5,
+            completed=False  # Task starts as incomplete
+        )   
+
+    def test_user_increments_work_time(self):
+        self.client.login(username='test', password='testpass')
+        response = self.client.post(reverse('increment_work_time', args=[self.continuous_task.id]))
+        self.continuous_task.refresh_from_db()
+        self.assertEqual(self.continuous_task.work_time, 6)
+        self.assertEqual(response.status_code, 302)
+
+    def test_completed_tasks_never_appear_in_dice_roll(self):
+        self.client.login(username='test', password='testpass')
+        self.continuous_task.completed = True
+        self.continuous_task.save()
+        response = self.client.post(reverse('dice_roll'))
+        session = self.client.session
+        result = session.get('result', {})
+        if result.get('type') == 'task':
+            self.assertFalse(result.get('task_id') == self.continuous_task.id)
+
+    def test_dice_roll_can_return_break(self):
+        self.client.login(username='test', password='testpass')
+        NormalTask.objects.all().update(completed=True)
+        ContinuousTask.objects.all().update(completed=True)
+        response = self.client.post(reverse('dice_roll'))
+        session = self.client.session
+        result = session.get('result', {})
+        self.assertTrue(result.get('type') == 'break')
