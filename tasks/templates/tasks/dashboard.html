@@ -36,7 +36,7 @@
 
 
         <h3>Normal Tasks:</h3>
-        <ul>
+        <ul class="task-list">
             {% for task in normal_tasks %}
                 <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'normal' %}">Edit</a></li>
             {% empty %}
@@ -46,7 +46,7 @@
         </ul>
 
         <h3>Continuous Tasks:</h3>
-        <ul>
+        <ul class="task-list">
             {% for task in continuous_tasks %}
                 <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'continuous' %}">Edit</a></li>
             {% empty %}
@@ -95,7 +95,7 @@
     <aside class = "right">
         <h2>Task Status</h2>
         <h3>Not Started Tasks:</h3>
-        <ul>
+        <ul class="task-list">
             {% for task in not_started %}
                 <li>{{ task.title }}</li>
             {% empty %}
@@ -104,7 +104,7 @@
         </ul>
 
         <h3>On Going Tasks:</h3>
-        <ul>
+        <ul class="task-list">
             {% for task in on_going %}
                 <li>{{ task.title }} - {{ task.work_time }} hours</li>
             {% empty %}
@@ -113,7 +113,7 @@
         </ul>
 
         <h3>Completed Tasks:</h3>
-        <ul>
+        <ul class="task-list">
             {% for task in completed %}
                 <li>{{ task.title }}</li>
             {% empty %}

@@ -1,16 +1,20 @@
 {% extends "tasks/base.html" %}
 
 {% block content %}
-<h1>Edit Task</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Changes</button>
-</form>
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Edit Task</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Changes</button>
+        </form>
 
-<form method="post" action="{% url 'delete_task' task_id task_type %}">
-    {% csrf_token %}
-    <button type="submit" onclick="return confirm('Are you sure?')">Delete Task</button>
-</form>
-<a href="{% url 'dashboard' %}">Back to Dashboard</a>
+        <form method="post" action="{% url 'delete_task' task_id task_type %}">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('Are you sure?')">Delete Task</button>
+        </form>
+        <p class="inline-link"><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
+    </div>
+</div>
 {% endblock %}

@@ -1,13 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do-App</title>
+    <link rel="stylesheet" href="{% static 'tasks/style.css' %}">
 </head>
 
 <body>
-    <nav>
+    <nav class="top-nav">
     {% if user.is_authenticated %}
         <span>Welcome, {{ request.user.username }}!</span> |
         <a href="{% url 'logout' %}">Logout</a>
