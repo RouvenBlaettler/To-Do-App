@@ -1,114 +1,125 @@
 {% extends "tasks/base.html" %}
 
 {% block content %}
-{% if request.user.is_authenticated %}
-<h1>Welcome {{ request.user.username }} to the To-Do App</h1>
-{% endif %}
-<h2>Create a New Task</h2>
-<form method="post" action="{% url 'create_task' %}">
-    {% csrf_token %}
-    <label for="task_type">
-        Task Type:
-        <select id="task_type" name="task_type">
-            <option value="normal">Normal Task</option>
-            <option value="continuous">Continuous Task</option>
-        </select>
-    </label>
-    <!-- Normal task form -->
-    <div id="normal_form_div">
-        {{ normal_task_form.as_p }}
+<div class = "layout">
+    <div class = "nav">
+        {% if request.user.is_authenticated %}
+        <h1>Welcome {{ request.user.username }} to the To-Do App</h1>
+        {% endif %}
     </div>
+    <aside class = "left">
+        <h2>Create a New Task</h2>
+        <form method="post" action="{% url 'create_task' %}">
+            {% csrf_token %}
+            <label for="task_type">
+                Task Type:
+                <select id="task_type" name="task_type">
+                    <option value="normal">Normal Task</option>
+                    <option value="continuous">Continuous Task</option>
+                </select>
+            </label>
+            <!-- Normal task form -->
+            <div id="normal_form_div">
+                {{ normal_task_form.as_p }}
+            </div>
 
-    <!-- Continuous task form, hidden by default -->
-    <div id="continuous_form_div" style="display:none;">
-        {{ continuous_task_form.as_p }}
-    </div>
-    <button type="submit">Create Task</button>
-</form>
-
-<hr>
-
-
-<h3>Normal Tasks:</h3>
-<ul>
-    {% for task in normal_tasks %}
-        <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'normal' %}">Edit</a></li>
-    {% empty %}
-        <li>No normal tasks available.</li>
-    {% endfor %}
-
-</ul>
-
-<h3>Continuous Tasks:</h3>
-<ul>
-    {% for task in continuous_tasks %}
-        <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'continuous' %}">Edit</a></li>
-    {% empty %}
-        <li>No continuous tasks available.</li>
-    {% endfor %}
-</ul>
-
-{% if not request.session.result %}
-<form method="post" action="{% url 'dice_roll' %}">
-    {% csrf_token %}
-    <h2><button type="submit">Roll the Dice!!!</button></h2>
-</form>
-{% endif %}
-
-{% if request.session.result.type == 'break' %}
-<h2>Dice Roll Result: Take a break!</h2>
-<form method="post" action="{% url 'dice_roll' %}">
-    {% csrf_token %}
-    <h2><button type="submit">Roll again</button></h2>
-</form>
-{% elif request.session.result.type == 'task' %}
-<h2>Dice Roll Result: {{ request.session.result.task_title }}</h2>
-<form method="post" action="{% url 'complete_task' request.session.result.task_id request.session.result.task_type %}">
-    {% csrf_token %}
-    <button type="submit">Complete Task</button>
-</form>
-{% if request.session.result.task_type == 'continuous' %}
-<form method="post" action="{% url 'increment_work_time' request.session.result.task_id %}">
-    {% csrf_token %}
-    <button type="submit">+1 hour!</button>
-</form>
-{% endif %}
-<form method="post" action="{% url 'dice_roll' %}">
-    {% csrf_token %}
-    <h2><button type="submit">Roll again!</button></h2>
-</form>
-{% endif %}
+            <!-- Continuous task form, hidden by default -->
+            <div id="continuous_form_div" style="display:none;">
+                {{ continuous_task_form.as_p }}
+            </div>
+            <button type="submit">Create Task</button>
+        </form>
 
 
 
+        <h3>Normal Tasks:</h3>
+        <ul>
+            {% for task in normal_tasks %}
+                <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'normal' %}">Edit</a></li>
+            {% empty %}
+                <li>No normal tasks available.</li>
+            {% endfor %}
 
-<h2>Task Status</h2>
-<h3>Not Started Tasks:</h3>
-<ul>
-    {% for task in not_started %}
-        <li>{{ task.title }}</li>
-    {% empty %}
-        <li>You started all tasks!!!</li>
-    {% endfor %}
-</ul>
+        </ul>
 
-<h3>On Going Tasks:</h3>
-<ul>
-    {% for task in on_going %}
-        <li>{{ task.title }} - {{ task.work_time }} hours</li>
-    {% empty %}
-        <li>No on going tasks.</li>
-    {% endfor %}
-</ul>
+        <h3>Continuous Tasks:</h3>
+        <ul>
+            {% for task in continuous_tasks %}
+                <li>{{ task.title }} | <a href="{% url 'edit_task' task.id 'continuous' %}">Edit</a></li>
+            {% empty %}
+                <li>No continuous tasks available.</li>
+            {% endfor %}
+        </ul>
+    </aside>
 
-<h3>Completed Tasks:</h3>
-<ul>
-    {% for task in completed %}
-        <li>{{ task.title }}</li>
-    {% empty %}
-        <li>No completed tasks.</li>
-    {% endfor %}
-</ul>
+
+    <main class = "center">
+        <h2>Dice Roll Game</h2>
+        {% if not request.session.result %}
+        <form method="post" action="{% url 'dice_roll' %}">
+            {% csrf_token %}
+            <h2><button type="submit">Roll the Dice!!!</button></h2>
+        </form>
+        {% endif %}
+
+        {% if request.session.result.type == 'break' %}
+        <h2>Dice Roll Result: Take a break!</h2>
+        <form method="post" action="{% url 'dice_roll' %}">
+            {% csrf_token %}
+            <h2><button type="submit">Roll again</button></h2>
+        </form>
+        {% elif request.session.result.type == 'task' %}
+        <h2>Dice Roll Result: {{ request.session.result.task_title }}</h2>
+        <form method="post" action="{% url 'complete_task' request.session.result.task_id request.session.result.task_type %}">
+            {% csrf_token %}
+            <button type="submit">Complete Task</button>
+        </form>
+        {% if request.session.result.task_type == 'continuous' %}
+        <form method="post" action="{% url 'increment_work_time' request.session.result.task_id %}">
+            {% csrf_token %}
+            <button type="submit">+1 hour!</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'dice_roll' %}">
+            {% csrf_token %}
+            <h2><button type="submit">Roll again!</button></h2>
+        </form>
+        {% endif %}
+    </main>
+
+
+
+    <aside class = "right">
+        <h2>Task Status</h2>
+        <h3>Not Started Tasks:</h3>
+        <ul>
+            {% for task in not_started %}
+                <li>{{ task.title }}</li>
+            {% empty %}
+                <li>You started all tasks!!!</li>
+            {% endfor %}
+        </ul>
+
+        <h3>On Going Tasks:</h3>
+        <ul>
+            {% for task in on_going %}
+                <li>{{ task.title }} - {{ task.work_time }} hours</li>
+            {% empty %}
+                <li>No on going tasks.</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Completed Tasks:</h3>
+        <ul>
+            {% for task in completed %}
+                <li>{{ task.title }}</li>
+            {% empty %}
+                <li>No completed tasks.</li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+</div>
 
 <script>
   // Get references to the dropdown and form divs
